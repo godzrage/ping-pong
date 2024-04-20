@@ -75,7 +75,7 @@ while game:
         ball.rect.y += speed_y
 
         if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
-            speed_x *= -1
+            speed_x *= -1.2
       
        #если мяч достигает границ экрана, меняем направление его движения
         if ball.rect.y > win_height-50 or ball.rect.y < 0:
@@ -87,6 +87,7 @@ while game:
             p2 += 1
             ball.rect.x = win_width / 2 - 50/2
             ball.rect.y = win_height / 2 - 50/2
+            speed_x = 3
             speed_x *= -1
 
 
@@ -95,6 +96,7 @@ while game:
             p1 += 1
             ball.rect.x = win_width / 2 - 50/2
             ball.rect.y = win_height / 2 - 50/2
+            speed_x = 3
             speed_x *= -1
 
         score = font.render(str(p1) +":"+ str(p2),True,(180,0,0))
