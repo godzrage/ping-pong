@@ -2,30 +2,42 @@ from pygame import *
 '''Необходимые классы'''
 #класс-родитель для спрайтов
 class GameSprite(sprite.Sprite):
-   def __init__(self, player_image, player_x, player_y, player_speed, wight, height):
-       super().__init__()
-       self.image = transform.scale(image.load(player_image), (wight, height)) #вместе 55,55 - параметры
-       self.speed = player_speed
-       self.rect = self.image.get_rect()
-       self.rect.x = player_x
-       self.rect.y = player_y
+    def __init__(self, player_image, player_x, player_y, player_speed, width, height):
+        super().__init__()
+        self.image = transform.scale(image.load(player_image), (width, height)) #вместе 55,55 - параметры
+        self.speed = player_speed
+        self.rect = self.image.get_rect()
+        self.rect.x = player_x
+        self.rect.y = player_y
+        self.width = width
+        self.height = height
+        self.player_image = player_image
 
-   def reset(self):
-       window.blit(self.image, (self.rect.x, self.rect.y))
+    def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+    def set_default(self,height):
+        self.height = height
+        self.image = transform.scale(image.load(self.player_image), (self.width, self.height))
+    
 
 class Player(GameSprite):
-   def update_r(self):
-       keys = key.get_pressed()
-       if keys[K_UP] and self.rect.y > 5:
-           self.rect.y -= self.speed
-       if keys[K_DOWN] and self.rect.y < win_height - 80:
-           self.rect.y += self.speed
-   def update_l(self):
+    def update_r(self):
+        keys = key.get_pressed()
+        if keys[K_UP] and self.rect.y > 5:
+            self.rect.y -= self.speed
+        if keys[K_DOWN] and self.rect.y < win_height - 80:
+            self.rect.y += self.speed
+    def update_l(self):
        keys = key.get_pressed()
        if keys[K_w] and self.rect.y > 5:
            self.rect.y -= self.speed
        if keys[K_s] and self.rect.y < win_height - 80:
            self.rect.y += self.speed
+    def change_size(self):
+        self.height *= 0.9
+        self.image = transform.scale(image.load(self.player_image), (int(self.width), int(self.height)))
+
 
 #игровая сцена:
 back = (200, 255, 255) #цвет фона (background)
@@ -48,9 +60,9 @@ p2 = 0
 racket_width = 50
 racket_height = 150
 
-#создания мяча и ракетки   
-racket1 = Player('redracket.png', 30, win_height / 2 - racket_height / 2, 4, racket_width, racket_height)
-racket2 = Player('greenracket.png', win_width - racket_width - 30, win_height / 2 - racket_height / 2, 4, racket_width, racket_height)
+#создания мяча и ракетки 
+racket1 = Player('redracket.png', 30, win_height / 2 - racket_height / 2, 6, racket_width, racket_height)
+racket2 = Player('greenracket.png', win_width - racket_width - 30, win_height / 2 - racket_height / 2, 6, racket_width, racket_height)
 ball = GameSprite('tenis_ball.png', win_width/ 2 - 25, win_height /2 - 25, 4, 50, 50)
 
 font.init()
@@ -76,11 +88,15 @@ while game:
 
         if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
             speed_x *= -1.2
+            if sprite.collide_rect(racket1, ball):
+                racket1.change_size()
+            if sprite.collide_rect(racket2, ball):
+                racket2.change_size()
+            
       
        #если мяч достигает границ экрана, меняем направление его движения
         if ball.rect.y > win_height-50 or ball.rect.y < 0:
             speed_y *= -1
-
 
        #если мяч улетел дальше ракетки, выводим условие проигрыша для первого игрока
         if ball.rect.x < 0:
@@ -89,7 +105,8 @@ while game:
             ball.rect.y = win_height / 2 - 50/2
             speed_x = 3
             speed_x *= -1
-
+            racket1.set_default(racket_height)
+            racket2.set_default(racket_height)
 
        #если мяч улетел дальше ракетки, выводим условие проигрыша для второго игрока
         if ball.rect.x > win_width:
@@ -98,6 +115,8 @@ while game:
             ball.rect.y = win_height / 2 - 50/2
             speed_x = 3
             speed_x *= -1
+            racket1.set_default(racket_height)
+            racket2.set_default(racket_height)
 
         score = font.render(str(p1) +":"+ str(p2),True,(180,0,0))
         window.blit(score,(450,20))
