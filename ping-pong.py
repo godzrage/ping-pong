@@ -26,21 +26,35 @@ class Player(GameSprite):
         keys = key.get_pressed()
         if keys[K_UP] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys[K_DOWN] and self.rect.y < win_height - 80:
+        if keys[K_DOWN] and self.rect.y < win_height - self.height:
             self.rect.y += self.speed
     def update_l(self):
        keys = key.get_pressed()
        if keys[K_w] and self.rect.y > 5:
            self.rect.y -= self.speed
-       if keys[K_s] and self.rect.y < win_height - 80:
+       if keys[K_s] and self.rect.y < win_height - self.height:
            self.rect.y += self.speed
     def change_size(self):
         self.height *= 0.9
         self.image = transform.scale(image.load(self.player_image), (int(self.width), int(self.height)))
 
 
+class Button():
+    def __init__(self,button_x,button_y, button_width,button_height,
+                button_color,button_text,button_text_size):
+        self.rect = Rect(button_x,button_y,button_width,button_height)
+        self.button_color = button_color
+        self.button_text = font.SysFont('verdana',button_text_size).render(button_text,True,black)
+    def fill(self):
+        draw.rect(window,self.button_color,self.rect)
+        window.blit(self.button_text,(self.rect.x + 20,self.rect.y + 20))
+    def collidepoint(self,x,y):
+        return self.rect.collidepoint(x,y)
+
 #игровая сцена:
 back = (200, 255, 255) #цвет фона (background)
+black = (0,0,0)
+red = (255,0,0)
 win_width = 900
 win_height = 600
 window = display.set_mode((win_width, win_height))
@@ -48,7 +62,7 @@ window.fill(back)
 
 #флаги, отвечающие за состояние игры
 game = True
-finish = False
+finish = True
 clock = time.Clock()
 FPS = 60
 
@@ -66,18 +80,28 @@ racket2 = Player('greenracket.png', win_width - racket_width - 30, win_height / 
 ball = GameSprite('tenis_ball.png', win_width/ 2 - 25, win_height /2 - 25, 4, 50, 50)
 
 font.init()
-font = font.Font(None, 35)
-lose1 = font.render('PLAYER 1 LOSE!', True, (180, 0, 0))
-lose2 = font.render('PLAYER 2 LOSE!', True, (180, 0, 0))
+font3 = font.Font(None, 35)
+lose1 = font3.render('PLAYER 1 LOSE!', True, (180, 0, 0))
+lose2 = font3.render('PLAYER 2 LOSE!', True, (180, 0, 0))
 
+click_x = 0
+click_y = 0
 
 speed_x = 3
 speed_y = 3
+
+#СОЗДАНИЕ КНОПКИ
+start_button_width = 200
+start_button_height = 100
+start_button = Button(win_width / 2 - start_button_width / 2,win_height / 3 - start_button_height / 2,start_button_width,start_button_height,red,"start",48)
 
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
+        if e.type == MOUSEBUTTONDOWN:
+            click_x,click_y = e.pos
+
   
     if finish != True:
         window.fill(back)
@@ -118,7 +142,7 @@ while game:
             racket1.set_default(racket_height)
             racket2.set_default(racket_height)
 
-        score = font.render(str(p1) +":"+ str(p2),True,(180,0,0))
+        score = font3.render(str(p1) +":"+ str(p2),True,(180,0,0))
         window.blit(score,(450,20))
 
         if p1 >= win_score or p2 >= win_score:
@@ -132,6 +156,18 @@ while game:
         racket1.reset()
         racket2.reset()
         ball.reset()
+
+    else:
+        if start_button.collidepoint(click_x,click_y):
+            p1 = 0
+            p2 = 0
+            click_x = 0
+            click_y = 0
+            racket1.set_default(racket_height)
+            racket2.set_default(racket_height)
+            finish = False
+        else:
+            start_button.fill()
 
     display.update()
     clock.tick(FPS)
