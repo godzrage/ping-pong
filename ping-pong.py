@@ -60,6 +60,13 @@ win_height = 600
 window = display.set_mode((win_width, win_height))
 window.fill(back)
 
+mixer.init()
+mixer.music.load("background_sound.ogg")
+mixer.music.play(-1)
+
+touch = mixer.Sound("touch_sound.ogg")
+winsnd = mixer.Sound("win_sound.ogg")
+
 #флаги, отвечающие за состояние игры
 game = True
 finish = True
@@ -111,6 +118,7 @@ while game:
         ball.rect.y += speed_y
 
         if sprite.collide_rect(racket1, ball) or sprite.collide_rect(racket2, ball):
+            touch.play()
             speed_x *= -1.2
             if sprite.collide_rect(racket1, ball):
                 racket1.change_size()
@@ -148,8 +156,10 @@ while game:
         if p1 >= win_score or p2 >= win_score:
             if p1 >= win_score:
                 window.blit(lose2,(450,300))
+                winsnd.play()
             if p2 >= win_score:
                 window.blit(lose1,(450,300))
+                winsnd.play()
             finish = True
             game = True
         
